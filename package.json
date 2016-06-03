@@ -1,0 +1,28 @@
+{
+  "name": "seed",
+  "version": "0.1.0",
+  "description": "Seed project for a MEAN site",
+  "main": "server.js",
+  "scripts": {
+    "test": "node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jcase069/seed.git"
+  },
+  "keywords": [
+    "MongoDB",
+    "Express",
+    "Angular",
+    "Node"
+  ],
+  "author": "Dan Hedges",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jcase069/seed/issues"
+  },
+  "homepage": "https://github.com/jcase069/seed",
+  "dependencies": {
+    "express": "^4.13.4"
+  }
+}
