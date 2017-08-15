@@ -1,12 +1,31 @@
-// default to 'development'
+// If no environment is set, default to development.
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
-var mongoose = require('mongoose'),
-	config = require('./config/config');
+require('./config/config');
 
-var db = mongoose.connect(config.db);
+var mongoose = require('./config/mongoose'),
+  express = require('./config/express'),
+  cfenv = require('cfenv');
 
-var express = require('./config/express');
-var app = express();
-app.listen(3000);
-console.log('Server listening on port 3000');
+var app = {};
+
+var start = function(db) {
+  app.express = express(db);
+  var passport = require('./config/passport')();
+
+  // get the app environment from Cloud Foundry
+  var appEnv = cfenv.getAppEnv();
+
+  // do not start listening, if this server is included for mocha testing
+  if (!module.parent) {
+    // start server on the specified port and binding host
+    app.express.listen(appEnv.port, '0.0.0.0', function() {
+      // print a message when the server starts listening
+      console.log("server starting on " + appEnv.url);
+    });
+  }
+}
+
+mongoose(start);
+
+module.exports = app;

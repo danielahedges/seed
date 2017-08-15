@@ -1,11 +1,8 @@
 exports.render = function(req, res) {
-	if (req.session.lastVisit) {
-		console.log(req.session.lastVisit);
-	}
-
-	req.session.lastVisit = new Date();
-
 	res.render('index', {
-		title: 'Hello World'
+		title: 'MyApp',
+		username: req.user ? req.user.username : null,
+    user: req.user ? JSON.stringify(req.user) : null,
+    admin: req.user && req.user.role === 'Admin',
 	});
 };

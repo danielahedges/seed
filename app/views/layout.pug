@@ -1,0 +1,61 @@
+doctype html
+html
+  head
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title= title
+    link(rel='stylesheet', href='//fonts.googleapis.com/icon?family=Material+Icons')
+    link(rel='stylesheet', href='//fonts.googleapis.com/css?family=Fredoka+One')
+    //- Debug unminified versions
+      link(rel='stylesheet', href='/css/materialize.css')
+      link(rel='stylesheet', href='/css/main.css')
+    link(rel='stylesheet', href='/css/main.min.css')
+  body
+    header
+      nav(role="navigation")
+        div.nav-wrapper.container
+          a.brand-logo#logo-container(href="/#!/")
+            | #{title}
+          mixin links
+            if (user == null)
+              li
+                a(href="/login") {{ 'NAVBAR.LOGIN' | translate }}
+              li
+                a(href="/signup") {{ 'NAVBAR.SIGNUP' | translate }}
+            else
+              li.orange-text
+                a.brown-text.disabled(href="/#!/") #{username}
+              li
+                a(href="/signout") {{ 'NAVBAR.LOGOUT' | translate }}
+          ul.side-nav#nav-mobile
+              +links
+          ul.right.hide-on-med-and-down
+              +links
+          a.button-collapse(data-activates="nav-mobile" href="#")
+              i.material-icons menu
+    main
+      block content
+
+    // third-party libraries
+    script(type='text/javascript', src='/lib/jquery/dist/jquery.min.js')
+    script(type='text/javascript', src='/js/materialize.min.js')
+    script(type='text/javascript', src='/lib/angular/angular.js')
+    script(type='text/javascript', src='/lib/angular-route/angular-route.min.js')
+    script(type='text/javascript', src='/lib/angular-resource/angular-resource.min.js')
+    script(type='text/javascript', src='/lib/angular-translate/angular-translate.min.js')
+    script(type='text/javascript', src='/lib/angular-sanitize/angular-sanitize.min.js')
+    //- debug unminified versions:
+      script(type='text/javascript', src='/lib/jquery/dist/jquery.js')
+      script(type='text/javascript', src='/js/materialize.js')
+      script(type='text/javascript', src='/lib/angular/angular.js')
+      script(type='text/javascript', src='/lib/angular-route/angular-route.js')
+      script(type='text/javascript', src='/lib/angular-resource/angular-resource.js')
+      script(type='text/javascript', src='/lib/angular-translate/angular-translate.js')
+      script(type='text/javascript', src='/lib/angular-sanitize/angular-sanitize.js')
+
+    //- now, either this:
+    script(type='text/javascript', src='/js/app.js')
+    // List all languages here:
+    script(type='text/javascript', src='/lang/english.client.lang.js')
+    script(type='text/javascript', src='/js/main.js')
+    //- or this:
+      script(type='text/javascript', src='/js/main.min.js')

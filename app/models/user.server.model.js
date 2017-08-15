@@ -1,38 +1,13 @@
 var mongoose = require('mongoose'),
-	Schema = mongoose.Schema;
+  Schema = mongoose.Schema,
+  passportLocalMongoose = require('passport-local-mongoose');
 
 var UserSchema = new Schema({
-	firstName: String,
-	lastName: String,
-	email: {
-		type: String,
-		match: /.+\@.+\..+/
-	},
 	username: {
 		type: String,
 		unique: true,
-		trim: true
-	},
-	password: {
-		type: String,
-		validate: [
-			function(password) {
-				return password.length > 6;
-			}, 'Password should longer'
-		]
-	},
-	website: {
-		type: String,
-		set: function(url) {
-			if (!url) {
-				return null;
-			} else {
-				if (url.indexOf('http://') !== 0 && url.indexOf('https://') !== 0) {
-					url = 'http://' + url;
-				}
-				return url;
-			}
-		}
+		trim: true,
+		index: true,
 	},
 	role: {
 		type: String,
@@ -41,16 +16,15 @@ var UserSchema = new Schema({
 	created: {
 		type: Date,
 		default: Date.now
-	}
-});
-
-UserSchema.virtual('fullName').get(function() {
-	return this.firstName + ' ' + this.lastName;
-}).set(function(fullName) {
-  // Won't work for names with more than two parts.
-	var splitName = fullName.split(' ');
-	this.firstName = splitName[0] || '';
-	this.lastName = splitName[1] || '';
+	},
+	lockedOut: {
+    type: Boolean,
+    default: false,
+  },
+  provisional: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 UserSchema.statics.findOneByUsername = function(username, callback) {
@@ -59,14 +33,7 @@ UserSchema.statics.findOneByUsername = function(username, callback) {
 	}, callback);
 };
 
-UserSchema.methods.authenticate = function(password) {
-	return this.password === password;
-};
-
-UserSchema.set('toJSON', {
-	getters: true,
-	virtuals: true
-});
+UserSchema.plugin(passportLocalMongoose);
 
 // Add the UserSchema object to mongoose under the name 'User'
 mongoose.model('User', UserSchema);

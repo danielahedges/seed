@@ -2,6 +2,12 @@ logs
 *.log
 npm-debug.log*
 node_modules
+public/css/main.min.css
+public/css/materialize.css
+public/js/app.js
+public/js/main.min.js
+public/js/materialize.js
+public/js/materialize.min.js
 public/lib
 
 # Mac OS X

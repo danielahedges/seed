@@ -1,39 +1,81 @@
-var express = require('express'),
+var config = require('./config'),
+  express = require('express'),
+  helmet = require('helmet'),
   morgan = require('morgan'),
-	json = require('express-json'),
-	bodyParser = require('body-parser'),
-	cookieParser = require('cookie-parser'),
-	compression = require('compression'),
-	expressSession = require('express-session'),
-	config = require('./config');
+  compress = require('compress'),
+  bodyParser = require('body-parser'),
+  methodOverride = require('method-override'),
+  session = require('express-session'),
+  MongoStore = require('connect-mongo')(session),
+  flash = require('connect-flash'),
+  passport = require('passport'),
+  http = require('http'),
+  cookieParser = require('cookie-parser'),
+  csrfProtection = require('csurf')({cookie:true});
 
-module.exports = function() {
-	var app = express();
+module.exports = function(db) {
+  var app = express();
+  var server = http.createServer(app);
 
-	require('../app/models/user.server.model.js');
+  // helmet sets http headers for security.
+  app.use(helmet());
 
-	if (config.name==='dev') {
-		app.use(morgan('dev', {}));
-		app.use(json());
-		app.use(bodyParser.urlencoded());
-		app.use(cookieParser());
+  if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+  } else if (process.env.NODE_ENV === 'production') {
+    //app.use(compress());
+    app.use(morgan('dev')); // For now.
+  }
 
-		app.use(expressSession({
-			secret: config.sessionSecret
-		}));
+  app.use(bodyParser.urlencoded({
+    extended: true,
+    limit: '10mb',
+  }));
+  app.use(cookieParser());
 
-		app.set('views', __dirname + '/../app/views');
-		app.set('view engine', config.viewEngine);
-	} else if (config.name==='prod') {
-		app.use(compression());
-	}
+  app.use(bodyParser.json({
+    limit: '10mb'
+  }));
+  app.use(methodOverride());
 
-	require('../app/routes/index.server.route.js')(app);
-	require('../app/routes/user.server.route.js')(app);
+  var mongoStore = new MongoStore({
+    mongooseConnection: db,
+    ttl: 60 * 15, // 15 minutes
+  });
 
-	//app.configure(function() {
-		app.use(express.static(__dirname + '/../public'));
-	//});
+  app.use(session({
+    saveUninitialized: false,
+    resave: true,
+    secret: config.sessionSecret,
+    store: mongoStore,
+    unset: 'destroy',
+    cookie: {
+      secure:  config.secure,
+      httpOnly: true,
+      domain: config.domain,
+    }
+  }));
 
-	return app;
+  app.set('views', './app/views');
+  app.set('view engine', 'pug');
+
+  app.use(flash());
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  require('../app/routes/index.server.routes.js')(app);
+  require('../app/routes/user.server.routes.js')(app);
+
+  app.use(csrfProtection);
+  app.use(function(req, res, next) {
+    var token=req.csrfToken();
+    res.cookie('XSRF-TOKEN', token);
+    next();
+  });
+
+  // require all routes.
+
+  app.use(express.static('./public'));
+
+  return server;
 };
