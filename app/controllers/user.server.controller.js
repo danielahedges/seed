@@ -89,6 +89,37 @@ exports.changePassword = function(req, res) {
 	});
 };
 
+exports.saveOAuthUserProfile = function(req, profile, done) {
+	User.findOne({
+		provider: profile.provider,
+		providerId: profile.providerId,
+	}, function(err, user) {
+		if (err) {
+			// Failed to execute search.
+			return done(err);
+		} else {
+			if (!user) {
+				// No user found.
+				var possibleUsername = profile.username;
+				User.findUniqueUsername(possibleUsername, null, function(availableUsername) {
+					profile.username = availableUsername;
+					user = new User(profile);
+					user.save(function(err) {
+						if (err) {
+							var message = tools.getErrorMessage(err);
+							req.flash('error', message);
+							return res.redirect('/signup');
+						}
+						return done(err, user);
+					});
+				});
+			} else {
+				return done(err, user);
+			}
+		}
+	});
+};
+
 // Middleware for authentication states
 
 /*

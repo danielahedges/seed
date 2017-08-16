@@ -25,6 +25,13 @@ var UserSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  provider: {
+		type: String,
+		// Validate 'provider' value existence
+		required: 'Provider is required'
+	},
+	providerId: String,
+	providerData: {},
 });
 
 UserSchema.statics.findOneByUsername = function(username, callback) {
@@ -34,6 +41,24 @@ UserSchema.statics.findOneByUsername = function(username, callback) {
 };
 
 UserSchema.plugin(passportLocalMongoose);
+
+UserSchema.statics.findUniqueUsername = function(username, suffix, callback) {
+  var _this = this;
+  var possibleUsername = username + (suffix || '');
+  _this.findOne({
+    username: possibleUsername
+  }, function(err, user) {
+    if (!err) {
+      if (!user) {
+        callback(possibleUsername);
+      } else {
+        return _this.findUniqueUsername(username, (suffix || 0) + 1, callback);
+      }
+    } else {
+      callback(null);
+    }
+  });
+};
 
 // Add the UserSchema object to mongoose under the name 'User'
 mongoose.model('User', UserSchema);

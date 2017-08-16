@@ -21,4 +21,14 @@ module.exports = function(app) {
 		.post(user.checkPasswordStrength);
 
 	app.get('/signout', user.signout);
+
+	app.get('/oauth/facebook', passport.authenticate('facebook', {
+		failureRedirect: '/signin',
+	}));
+
+	app.get('/oauth/facebook/callback', passport.authenticate('facebook', {
+		failureRedirect: '/signin',
+		successRedirect: '/',
+	}));
+
 };
