@@ -12,4 +12,9 @@ module.exports = {
     clientSecret: 'get_from_dev.twitter.com',
     callbackURL: 'http://localhost:6005/oauth/twitter/callback',
   },
+  google: {
+    clientID: 'get_from_console.developers.google.com',
+    clientSecret: 'get_from_console.developers.google.com',
+    callbackURL: 'http://localhost:6005/oauth/google/callback',
+  },
 };
